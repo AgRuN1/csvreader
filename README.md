@@ -14,3 +14,6 @@ May be two exceptions at the time creation of a reader:
 At the time of iteration may be thrown two exceptions:
 * Empty line
 * Invalid count of elements at the line
+# Made by
+* [Investor](https://vk.com/maxsharun)
+* [Developer](https://vk.com/agrun1)
