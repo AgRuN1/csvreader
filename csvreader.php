@@ -1,15 +1,15 @@
 <?php
-
 class CSVReader implements Iterator{
-	protected $is_head;
-	protected $heads;
-	protected $line;
-	protected $current_array;
-	protected $length = 0;
-	public $sep;
+	protected $is_head; // either there are header or aren't
+	protected $heads; // Array of headers
+	protected $line; // Current line
+	protected $current_array; // Items array of current line
+	protected $length = 0; // Length lines
+	protected $pointer = 0; // Pointer to begin of data
+	public $sep; // Separate symbol
 	/*
 		Get: path to file, separator char and 
-		either headers are at the top or are not
+		either there are headers or aren't
 	*/
 	public function __construct($file, $sep = ',', $is_head = true){
 		if(file_exists($file)){
@@ -20,7 +20,13 @@ class CSVReader implements Iterator{
 		if(!$this->fp)
 			throw new Exception('File are not opened');
 		$this->sep = $sep;
-		$this->is_head = $is_head;
+		$this->is_head = (bool)  $is_head;
+		if($is_head){
+			$head = $this->read_line();
+			$this->heads = $this->get_array($head);
+			$this->length = count($this->heads);
+			$this->pointer = ftell($this->fp);
+		}
 	}
 	/*
 		Close the file
@@ -82,13 +88,8 @@ class CSVReader implements Iterator{
 		return $this->current_array;
 	}
 	public function rewind(){
-		fseek($this->fp, 0);
-		$this->line = 0;
-		if($this->is_head){
-			$head = $this->read_line();
-			$this->heads = $this->get_array($head);
-			$this->length = count($this->heads);
-		}
+		fseek($this->fp, $this->pointer);
+		$this->line = (int) $this->is_head;
 		$this->next();
 	}
 	public function key(){
