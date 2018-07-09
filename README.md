@@ -15,5 +15,6 @@ At the time of iteration may be thrown two exceptions:
 * Empty line
 * Invalid count of elements at the line
 # Made by
+* [Web Site](http://inmtoo.com/)
 * [Investor](https://vk.com/maxsharun)
 * [Developer](https://vk.com/agrun1)

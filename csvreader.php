@@ -1,4 +1,11 @@
 <?php
+/*
+	CSV Reader Library
+	Web Site - http://inmtoo.com
+	Owner/Investor - https://vk.com/maxsharun
+	Developer - https://vk.com/agrun1
+	License - MIT
+*/
 class CSVReader implements Iterator{
 	protected $is_head; // either there are header or aren't
 	protected $heads; // Array of headers
