@@ -49,6 +49,12 @@ class CSVReader implements Iterator{
 		$this->line++;
 		return trim($line);
 	}
+
+	public function headers(){
+		if(!$this->is_head)
+			throw new Exception('There are not headers');
+		return $this->heads;
+	}
 	/*
 		Get a line from file
 		Return an array separated by separator char

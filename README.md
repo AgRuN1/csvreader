@@ -9,8 +9,14 @@ May be two exceptions at the time creation of a reader:
 # Iterate a reader
     foreach($reader as $number => $line):
         echo $line['column1'];
+	echo "line number: " . $number;
+	echo "headers: ";
+	foreach($reader->headers as $header){
+		echo "$header : ";
+	}
         echo $line['column2'];
     endforeach;
+Method headers() returns an array of headers or exception if there are not it
 At the time of iteration may be thrown two exceptions:
 * Empty line
 * Invalid count of elements at the line
