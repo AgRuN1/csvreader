@@ -9,8 +9,8 @@
 class CSVReader implements Iterator{
 	protected $is_head; // either there are header or aren't
 	protected $heads; // Array of headers
-	protected $line; // Current line
-	protected $current_array; // Items array of current line
+	protected $line; // Number of current line
+	protected $current_line; // Current line
 	protected $length = 0; // Length lines
 	protected $pointer = 0; // Pointer to begin of data
 	public $sep; // Separate symbol
@@ -60,26 +60,51 @@ class CSVReader implements Iterator{
 		Return an array separated by separator char
 	*/
 	protected function get_array($line){
-		if(empty($line))
-			throw new Exception('Empty line number ' . $this->line);
-		return explode($this->sep, $line);
+		$arr = array();
+		$stack = array();
+		$quotes = array('"', "'");
+		$element = '';
+		$chars = str_split($line);
+		foreach($chars as $char){
+			if($char == ';' && !count($stack)){
+				array_push($arr, trim($element, "\'\""));
+				$element = '';
+				continue;
+			}
+			if(in_array($char, $quotes)){
+				if(count($stack) && $stack[count($stack) - 1] == $char)
+					array_pop($stack);
+				else
+					array_push($stack, $char);
+			}
+			$element .= $char;
+		}
+		array_push($arr, trim($element, "\'\""));
+		return $arr;
+	}
+	/*
+		Return the current line
+	*/
+	public function get_line(){
+		return $this->current_line;
 	}
 	/*
 		Check either file ended or not
 	*/
 	public function valid(){
-		return $this->current_array;
+		return $this->current_line;
 	}
 	/*
 		Return next array
 	*/
 	public function next(){
-		$line = $this->read_line();
-		if(feof($this->fp)){
-			$this->current_array = false;
-			return;
-		}
-		$arr = $this->get_array($line);
+		$this->current_line = $this->read_line();
+	}
+	/* 
+		Return the current value 
+	*/
+	public function current(){
+		$arr = $this->get_array($this->current_line);
 		if($this->length === 0)
 			$this->length = count($arr);
 		else if(count($arr) != $this->length)
@@ -91,20 +116,22 @@ class CSVReader implements Iterator{
 				$value = $arr[$i];
 				$result[$key] = $value;
 			}
-			$this->current_array = $result;
+			return $result;
 		}else{
-			$this->current_array = $arr;
+			return $arr;
 		}
 	}
-
-	public function current(){
-		return $this->current_array;
-	}
+	/*
+		Start iteration from begin
+	*/
 	public function rewind(){
 		fseek($this->fp, $this->pointer);
 		$this->line = (int) $this->is_head;
 		$this->next();
 	}
+	/*
+		Return number of the current line
+	*/
 	public function key(){
 		return $this->line;
 	}
