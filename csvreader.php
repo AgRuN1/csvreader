@@ -72,12 +72,16 @@ class CSVReader implements Iterator{
 				continue;
 			}
 			if(in_array($char, $quotes)){
-				if(count($stack) && $stack[count($stack) - 1] == $char)
-					array_pop($stack);
+				if(count($stack) && $stack[0] == $char)
+					array_shift($stack);
 				else
-					array_push($stack, $char);
+					array_unshift($stack, $char);
 			}
 			$element .= $char;
+		}
+		if(count($stack){
+			throw new Exception('There are not closing quote at the line number '
+			. $this->line);
 		}
 		array_push($arr, trim($element, "\'\""));
 		return $arr;
