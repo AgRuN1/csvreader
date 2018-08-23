@@ -11,7 +11,7 @@ class CSVReader implements Iterator{
 	protected $heads; // Array of headers
 	protected $line; // Number of current line
 	protected $current_line; // Current line
-	protected $length = 0; // Length lines
+	protected $length; // Length lines
 	protected $pointer = 0; // Pointer to begin of data
 	public $sep; // Separate symbol
 	/*
@@ -28,11 +28,18 @@ class CSVReader implements Iterator{
 			throw new Exception('File are not opened');
 		$this->sep = $sep;
 		$this->is_head = (bool)  $is_head;
+		$head = $this->read_line();
+		$heads = $this->get_array($head);
+		$this->length = count($heads);
 		if($is_head){
-			$head = $this->read_line();
-			$this->heads = $this->get_array($head);
-			$this->length = count($this->heads);
+			$this->heads = $heads;
 			$this->pointer = ftell($this->fp);
+		}else{
+			$nums = array();
+			for($i = 0, $len = count($heads); $i < $len; $i++){
+				array_push($nums, $i);
+			}
+			$this->heads = $nums;
 		}
 	}
 	/*
@@ -49,10 +56,7 @@ class CSVReader implements Iterator{
 		$this->line++;
 		return trim($line);
 	}
-
 	public function headers(){
-		if(!$this->is_head)
-			throw new Exception('There are not headers');
 		return $this->heads;
 	}
 	/*
@@ -72,16 +76,12 @@ class CSVReader implements Iterator{
 				continue;
 			}
 			if(in_array($char, $quotes)){
-				if(count($stack) && $stack[0] == $char)
-					array_shift($stack);
+				if(count($stack) && $stack[count($stack) - 1] == $char)
+					array_pop($stack);
 				else
-					array_unshift($stack, $char);
+					array_push($stack, $char);
 			}
 			$element .= $char;
-		}
-		if(count($stack){
-			throw new Exception('There are not closing quote at the line number '
-			. $this->line);
 		}
 		array_push($arr, trim($element, "\'\""));
 		return $arr;
@@ -109,9 +109,7 @@ class CSVReader implements Iterator{
 	*/
 	public function current(){
 		$arr = $this->get_array($this->current_line);
-		if($this->length === 0)
-			$this->length = count($arr);
-		else if(count($arr) != $this->length)
+		if(count($arr) != $this->length)
 			throw new Exception('Invalid count of items at the line number ' . $this->line);
 		if($this->is_head){
 			$result = array();
